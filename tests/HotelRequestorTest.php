@@ -13,4 +13,15 @@ class HotelRequestorTest extends PHPUnit_Framework_TestCase{
     $this->assertEquals("http://rest.mercuriosistemi.com/api/hotel/hotel/1", $hotelLists[0]->href);
   }
 
+  public function testFetchesOneHotel(){
+    $serviceConnector = new ServiceConnectorDummyWithMoreHotelData();
+    $requestor = new HotelRequestor($serviceConnector);
+    $hotel = $requestor->getHotelInfo(1);
+    $this->assertEquals("Hotel Rio", $hotel->name);
+    $this->assertEquals("2", $hotel->stars);
+    $this->assertEquals("http://www.hotelriolignano.com", $hotel->web);
+    $this->assertEquals("info@hotelriolignano.com", $hotel->email);
+    $this->assertEquals("+39.0431.71280", $hotel->telefono);
+    $this->assertEquals("+39.0431.71637", $hotel->fax);
+  }
 }
