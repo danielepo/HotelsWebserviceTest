@@ -10,12 +10,14 @@ class HotelEntry
   public $email;
   public $telefono;
   public $fax;
+  public $id;
 
-  public function __construct($name, $stars, $href)
+  public function __construct($name, $stars, $href, $id = 0)
   {
     $this->name = $name;
     $this->stars = $stars;
     $this->href = $href;
+    $this->id = $id;
   }
   public function setEmail($email)
   {

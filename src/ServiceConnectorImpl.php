@@ -11,7 +11,8 @@ class ServiceConnectorImpl implements ServiceConnector
   {
 
     $xml = $this->execGet($this->host);
-    $entries = $xml->xpath("//entry");
+    $transformxml = new SimpleXMLElement($xml);
+    $entries = $transformxml->xpath("//entry");
     return $entries;
   }
 
@@ -36,8 +37,8 @@ class ServiceConnectorImpl implements ServiceConnector
   }
   private function extractXml($responseString){
     $xmlpos = strpos($responseString, '<?xml version="1.0" encoding="UTF-8"?');
-    $xmlstring = substr($responseString, $xmlpos);
-    return new SimpleXMLElement($xmlstring);
+    return substr($responseString, $xmlpos);
+    
     
   }
 }

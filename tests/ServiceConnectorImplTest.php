@@ -11,8 +11,8 @@ class ServiceConnectorImplTest extends PHPUnit_Framework_TestCase{
 
   public function testFetchesOneHotel(){
     $serviceConnector = new ServiceConnectorImpl();
-    $hotelxml = $serviceConnector->getHotelInformation("http://rest.mercuriosistemi.com/api/hotel/hotel/1072");
-    
+    $xml = $serviceConnector->getHotelInformation("http://rest.mercuriosistemi.com/api/hotel/hotel/1072");
+    $hotelxml =  simplexml_load_string($xml);
     $this->assertEquals("Hotel Rio", trim((string)$hotelxml->esercizio->nome));
     $this->assertEquals("http://www.hotelriolignano.com", trim((string)$hotelxml->esercizio->web));
     $this->assertEquals("info@hotelriolignano.com", trim((string)$hotelxml->esercizio->email));
