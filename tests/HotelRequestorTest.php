@@ -4,8 +4,9 @@
 
 class HotelRequestorTest extends PHPUnit_Framework_TestCase{
   public function testFetchesArray(){
-    $serviceConnector = new \ServiceConnectorDummy();
-    $requestor = new HotelRequestor();
+    
+    $serviceConnector = new ServiceConnectorDummy();
+    $requestor = new HotelRequestor($serviceConnector);
     $hotelLists = $requestor->fetchAll();
     $this->assertEquals("Hotel Rio", $hotelLists[0]->name);
     $this->assertEquals("2", $hotelLists[0]->stars);

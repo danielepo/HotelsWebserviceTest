@@ -3,5 +3,5 @@
 interface ServiceConnector
 {
     public function getAllHotels();
-    public function getHotelInformation();
+    public function getHotelInformation($href);
 }
