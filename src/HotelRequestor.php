@@ -5,94 +5,102 @@ class HotelRequestor
 
   private $serviceConnector;
   private $sortFunction = 'sort_by_star';
+  private $paginator;
+  private $cacher;
 
-  public function __construct($serviceConnector)
+  public function __construct($serviceConnector,$cacher)
   {
     $this->serviceConnector = $serviceConnector;
+    $this->cacher = $cacher;
   }
 
   public function fetchAll()
   {
-    $hotelsEntries = $this->serviceConnector->getAllHotels();
-    $return = array();
-    $cacher = new Cacher();
     try
     {
-      $return = $cacher->read();
+      $hotelsEntries = $this->cacher->read("entries");
     }
     catch (Exception $exc)
     {
-
-
-      foreach ($hotelsEntries as $entry)
+      $entries = $this->serviceConnector->getAllHotels();
+      $hotelsArray = array();
+      foreach ($entries as $entry)
       {
-        $id = (int) $entry["id"];
-        $url = (string) $entry->link['href'];
-        $hotelInfo = (string) $this->serviceConnector->getHotelInformation($url);
-        $xml = simplexml_load_string($hotelInfo);
-        $stars = (string) $xml["stelle"];
-        $name = trim((string) $xml->esercizio->nome);
-
-        $return[] = $this->getHotelInfo($id);
-        if (count($return) > 5)
-        {
-          break;
-        }
+        $hotelsArray[] = array('id' => (string) $entry["id"], "href" => (string) $entry->link['href']);
       }
-      $cacher->put($return);
+      $this->cacher->put("entries", $hotelsArray);
+      $hotelsEntries = $this->cacher->read("entries");
     }
-    uasort($return, $this->sortFunction);
+    
+    $this->paginator->maxLimit = (int)(count($hotelsEntries) /10)+1;
+    $first = ($this->paginator->current - 1) * 10;
+    $last = min($first + 10, count($hotelsEntries));
+    $return = array();
+    
+    for ($i = $first; $i < $last; $i++)
+    {
+      $entry = $hotelsEntries[$i];
+      $id = (int) $entry->id;
+
+      $hotelInfo = $this->getHotelInfo($id);
+
+      $return[] = $hotelInfo;
+    }
+
     return $return;
+  }
+
+  public function setPaginator($paginator)
+  {
+    $this->paginator = $paginator;
   }
 
   public function getHotelInfo($id)
   {
-    $url = "http://rest.mercuriosistemi.com/api/hotel/hotel/$id";
-    $hotelInfo = (string) $this->serviceConnector->getHotelInformation($url);
-    $xml = simplexml_load_string($hotelInfo);
-    $stars = (string) $xml["stelle"];
-    $name = trim((string) $xml->esercizio->nome);
-    $hotelEntry = new HotelEntry($name, $stars, $url, $id);
-    if (isset($xml->esercizio->web))
+    try
     {
-      $hotelEntry->setWeb($xml->esercizio->web);
+      $hotelEntry = $this->cacher->read("hotelInfo_$id");
     }
-    if (isset($xml->esercizio->email))
+    catch (Exception $exc)
     {
-      $hotelEntry->setEmail($xml->esercizio->email);
+      $url = "http://rest.mercuriosistemi.com/api/hotel/hotel/$id";
+      
+      $xmlstr = (string) $this->serviceConnector->getHotelInformation($url);
+      $xml = simplexml_load_string($xmlstr);
+      
+      $stars = (string) $xml["stelle"];
+      $name = trim((string) $xml->esercizio->nome);
+      
+      $hotelEntry = new HotelEntry($name, $stars, $url, $id);
+      $this->addOtherFields($xml->esercizio, $hotelEntry);
+      
+      $this->cacher->put("hotelInfo_$id", $hotelEntry);
     }
-    if (isset($xml->esercizio->telefono))
-    {
-      $hotelEntry->setTelefono($xml->esercizio->telefono);
-    }
-    if (isset($xml->esercizio->fax))
-    {
-      $hotelEntry->setFax($xml->esercizio->fax);
-    }
+    
     return $hotelEntry;
   }
-
+  private function addOtherFields($esercizio, &$hotelEntry){
+    if (isset($esercizio->web))
+      {
+        $hotelEntry->setWeb($esercizio->web);
+      }
+      if (isset($esercizio->email))
+      {
+        $hotelEntry->setEmail($esercizio->email);
+      }
+      if (isset($esercizio->telefono))
+      {
+        $hotelEntry->setTelefono($esercizio->telefono);
+      }
+      if (isset($esercizio->fax))
+      {
+        $hotelEntry->setFax($esercizio->fax);
+      }
+  }
+      
   public function setSorter($sorter)
   {
-    $this->sortFunction = $sorter;
+    $this->serviceConnector->sortFunction($sorter);
   }
 
-}
-
-function sort_by_name($a, $b)
-{
-  if ($a->name == $b->name)
-  {
-    return 0;
-  }
-  return ($a->name < $b->name) ? -1 : 1;
-}
-
-function sort_by_star($a, $b)
-{
-  if ($a->stars == $b->stars)
-  {
-    return 0;
-  }
-  return ($a->stars < $b->stars) ? 1 : -1;
 }

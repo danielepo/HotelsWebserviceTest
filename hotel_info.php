@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <?php 
-    require_once "./src/ServiceConnector.php";
-    require_once "./src/ServiceConnectorImpl.php";
-    require_once "./src/HotelRequestor.php";
-    require_once "./src/HotelEntry.php";
-    
+function __autoload($class_name)
+{
+  if (file_exists("./src/" . $class_name . '.php'))
+  {
+    require_once "./src/" . $class_name . '.php';
+    return true;
+  }
+  return false;
+}
 ?>
 <html>
   <head>
@@ -14,7 +18,7 @@
   <body>
     <?php
     $sc = new ServiceConnectorImpl();
-    $hr = new HotelRequestor($sc);
+    $hr = new HotelRequestor($sc,new Cacher());
     if(is_numeric($_GET['id'])){
       $id = $_GET['id'];
     }else{

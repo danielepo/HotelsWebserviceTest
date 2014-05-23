@@ -1,38 +1,58 @@
 <?php
 
-class Cacher
+class Cacher implements CacheInt
 {
 
-  private $TTL = 3600; //Time to live settato arbitrariamente a 1 h
+  private $serialized;
 
-  public function put($obj)
-  {
-    $serializable = array('time' => microtime(true), 'object' => $obj);
-
-    $handle = fopen("cache.txt", "w");
-    fwrite($handle, json_encode($serializable));
-    fclose($handle);
-  }
-
-  public function read()
+  public function __construct()
   {
     $filename = "cache.txt";
     if (!file_exists($filename))
     {
-      throw new Exception("Cache Not Set");
+      $this->serialized = array();
     }
-    $handle = fopen($filename, "r");
-    $file = fread($handle, filesize($filename));
-    fclose($handle);
+    else
+    {
+      $handle = fopen($filename, "r");
+      $file = fread($handle, filesize($filename));
+      fclose($handle);
 
-    $serialized = json_decode($file);
-    $savedTime = $serialized->time;
-    $diff = microtime(true) - $savedTime;
-    if ($diff > $this->TTL)
+      $this->serialized = json_decode($file);
+    }
+  }
+
+  private $TTL = 3600; //Time to live settato arbitrariamente a 1 h
+
+  public function put($index, $obj)
+  {
+    $this->serialized->$index = array('time' => microtime(true), 'object' => $obj);
+
+    $handle = fopen("cache.txt", "w");
+    fwrite($handle, json_encode($this->serialized));
+    fclose($handle);
+  }
+
+  public function read($index)
+  {
+    if (!isset($this->serialized->$index))
+    {
+      throw new Exception("Index Still Not Saved");
+    }
+    if (isset($this->serialized->$index->time))
+    {
+      $savedTime = $this->serialized->$index->time;
+      $diff = microtime(true) - $savedTime;
+      if ($diff > $this->TTL)
+      {
+        throw new Exception("Cache Too Old");
+      }
+    }
+    else
     {
       throw new Exception("Cache Too Old");
     }
-    return $serialized->object;
+    return $this->serialized->$index->object;
   }
 
 }

@@ -6,11 +6,13 @@ class ServiceConnectorImpl implements ServiceConnector
   private $host = "http://rest.mercuriosistemi.com/api/portali/lignanoit/presenti/hotel";
   private $username = "Daniele.Pozzobon";
   private $password = "546219819";
-
+  private $sorter = "nome";
   public function getAllHotels()
   {
-
-    $xml = $this->execGet($this->host);
+    $host = $this->host;
+    $host .= "?ordine=";
+    $host .= $this->sorter;
+    $xml = $this->execGet($host);
     $transformxml = new SimpleXMLElement($xml);
     $entries = $transformxml->xpath("//entry");
     return $entries;
@@ -41,4 +43,10 @@ class ServiceConnectorImpl implements ServiceConnector
     
     
   }
+
+  public function sortFunction($sortBy)
+  {
+    $this->sorter = $sortBy;
+  }
+
 }

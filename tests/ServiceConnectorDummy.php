@@ -33,5 +33,10 @@ class ServiceConnectorDummy implements ServiceConnector
     return $xmlstring;
   }
 
+  public function sortFunction($sortBy)
+  {
+    
+  }
+
 //put your code here
 }

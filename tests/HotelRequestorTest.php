@@ -6,7 +6,8 @@ class HotelRequestorTest extends PHPUnit_Framework_TestCase{
   public function testFetchesArray(){
     
     $serviceConnector = new ServiceConnectorDummy();
-    $requestor = new HotelRequestor($serviceConnector);
+    $requestor = new HotelRequestor($serviceConnector,new CacherDummy());
+    $requestor->setPaginator(new Paginator(1));
     $hotelLists = $requestor->fetchAll();
     $this->assertEquals("Hotel Rio", $hotelLists[0]->name);
     $this->assertEquals("2", $hotelLists[0]->stars);
@@ -15,7 +16,8 @@ class HotelRequestorTest extends PHPUnit_Framework_TestCase{
 
   public function testFetchesOneHotel(){
     $serviceConnector = new ServiceConnectorDummyWithMoreHotelData();
-    $requestor = new HotelRequestor($serviceConnector);
+    $requestor = new HotelRequestor($serviceConnector,new CacherDummy());
+    $requestor->setPaginator(new Paginator(1));
     $hotel = $requestor->getHotelInfo(1);
     $this->assertEquals("Hotel Rio", $hotel->name);
     $this->assertEquals("2", $hotel->stars);
