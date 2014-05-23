@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <?php
+
 function __autoload($class_name)
 {
   if (file_exists("./src/" . $class_name . '.php'))
@@ -9,6 +10,7 @@ function __autoload($class_name)
   }
   return false;
 }
+
 //require_once "./src/Paginator.php";
 //require_once "./src/CacheInt.php";
 //require_once "./src/Cacher.php";
@@ -25,19 +27,21 @@ function __autoload($class_name)
   <body>
     <?php
     $sorter = 'nome';
-    
+    $order = 0;
+
     if (isset($_GET['sort_by']) && $_GET['sort_by'] == 1)
     {
       $sorter = 'stelle';
+      $order = 1;
     }
     $page = 1;
     if (isset($_GET['page']) && is_numeric($_GET['page']))
     {
       $page = $_GET['page'];
     }
-
+    VisitsLogger::log(addslashes($_SERVER['REMOTE_ADDR']), $page, "HOTEL_LIST",$order);
     $sc = new ServiceConnectorImpl();
-    $hr = new HotelRequestor($sc,new Cacher());
+    $hr = new HotelRequestor($sc, new Cacher());
     $hr->setSorter($sorter);
     $paginator = new Paginator($page);
     $hr->setPaginator($paginator);
@@ -45,20 +49,21 @@ function __autoload($class_name)
     ?>
     <table>
       <header><tr><td><a href="index.php?sort_by=0">Nome</a></td><td><a href="index.php?sort_by=1">Stelle</a></td></tr></header>
-      <?php foreach ($hotelList as $hotel)
+      <?php
+      foreach ($hotelList as $hotel)
       {
         ?>
         <tr><td><a target='_blank' href="hotel_info.php?id=<?php echo $hotel->id; ?>"><?php echo $hotel->name; ?></a></td><td><?php echo $hotel->stars; ?></td></tr>
-<?php } ?>
+        <?php } ?>
     </table>
-        <table><tr>
-      <?php 
-      $pagesList = $paginator->paginator();
-      foreach ($pagesList as $number){
-        echo "<td><a href='index.php?sort_by=0&page=$number'>$number</a></td>";
-      }
-        
-      ?>
+    <table><tr>
+        <?php
+        $pagesList = $paginator->paginator();
+        foreach ($pagesList as $number)
+        {
+          echo "<td><a href='index.php?sort_by=0&page=$number'>$number</a></td>";
+        }
+        ?>
       </tr></table>
   </body>
 </html>
