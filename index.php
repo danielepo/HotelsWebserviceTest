@@ -64,7 +64,7 @@ $hotelList = $hr->fetchAll();
         $pagesList = $paginator->paginator();
         foreach ($pagesList as $number)
         {
-          echo "<td><a href='index.php?sort_by=0&page=$number'>$number</a></td>";
+          echo "<td><a href='index.php?sort_by=$paginator->current&page=$number'>$number</a></td>";
         }
         ?>
       </tr>

@@ -4,7 +4,7 @@ class HotelRequestor
 {
 
   private $serviceConnector;
-  private $sortFunction = 'sort_by_star';
+  private $sortFunction = 'nome';
   private $paginator;
   private $cacher;
 
@@ -21,6 +21,7 @@ class HotelRequestor
 
   public function setSorter($sorter)
   {
+    $this->sortFunction = $sorter;
     $this->serviceConnector->sortFunction($sorter);
   }
 
@@ -28,7 +29,7 @@ class HotelRequestor
   {
     try
     {
-      $hotelsEntries = $this->cacher->read("entries");
+      $hotelsEntries = $this->cacher->read("entries_" . $this->sortFunction);
     }
     catch (Exception $exc)
     {
@@ -48,8 +49,16 @@ class HotelRequestor
     {
       $hotelsArray[] = array('id' => (string) $entry["id"], "href" => (string) $entry->link['href']);
     }
-    $this->cacher->put("entries", $hotelsArray);
-    return $this->cacher->read("entries");
+    $this->cacher->put("entries_" . $this->sortFunction, $hotelsArray);
+    try
+    {
+      $return = $this->cacher->read("entries_" . $this->sortFunction);
+    }
+    catch (Exception $e)
+    {
+      return json_decode(json_encode($hotelsArray));
+    }
+    return $return;
   }
 
   private function getHotelsArray($hotelsEntries)

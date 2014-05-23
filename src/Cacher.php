@@ -9,20 +9,28 @@ class Cacher implements CacheInt
   public function __construct()
   {
     $filename = "cache.txt";
-    if (!file_exists($filename))
+    try
     {
+      if (!file_exists($filename))
+      {
+        $this->serialized = array();
+      }
+      else
+      {
+        $handle = fopen($filename, "r");
+  
+        $file = fread($handle, filesize($filename));
+        fclose($handle);
+
+        $this->serialized = json_decode($file);
+      }
+    }
+    catch (Exception $e)
+    {
+
       $this->serialized = array();
     }
-    else
-    {
-      $handle = fopen($filename, "r");
-      $file = fread($handle, filesize($filename));
-      fclose($handle);
-
-      $this->serialized = json_decode($file);
-    }
   }
-
 
   public function put($index, $obj)
   {
