@@ -4,6 +4,7 @@ class Cacher implements CacheInt
 {
 
   private $serialized;
+  private $TTL = 3600; //Time to live settato arbitrariamente a 1 h
 
   public function __construct()
   {
@@ -22,7 +23,6 @@ class Cacher implements CacheInt
     }
   }
 
-  private $TTL = 3600; //Time to live settato arbitrariamente a 1 h
 
   public function put($index, $obj)
   {

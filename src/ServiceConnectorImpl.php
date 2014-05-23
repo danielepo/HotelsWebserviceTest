@@ -7,6 +7,12 @@ class ServiceConnectorImpl implements ServiceConnector
   private $username = "Daniele.Pozzobon";
   private $password = "546219819";
   private $sorter = "nome";
+  
+  public function sortFunction($sortBy)
+  {
+    $this->sorter = $sortBy;
+  }
+  
   public function getAllHotels()
   {
     $host = $this->host;
@@ -30,7 +36,6 @@ class ServiceConnectorImpl implements ServiceConnector
     curl_setopt($url_handler, CURLOPT_HTTPHEADER, array('Accept: text/xml', 'Content-Type: application/json'));
     curl_setopt($url_handler, CURLOPT_HEADER, 1);
     curl_setopt($url_handler, CURLOPT_USERPWD, $this->username . ":" . $this->password);
-    curl_setopt($url_handler, CURLOPT_TIMEOUT, 30);
     curl_setopt($url_handler, CURLOPT_RETURNTRANSFER, TRUE);
     $return = curl_exec($url_handler);
     curl_close($url_handler);
@@ -40,13 +45,8 @@ class ServiceConnectorImpl implements ServiceConnector
   private function extractXml($responseString){
     $xmlpos = strpos($responseString, '<?xml version="1.0" encoding="UTF-8"?');
     return substr($responseString, $xmlpos);
-    
-    
   }
 
-  public function sortFunction($sortBy)
-  {
-    $this->sorter = $sortBy;
-  }
+  
 
 }

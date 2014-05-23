@@ -10,6 +10,19 @@ function __autoload($class_name)
   }
   return false;
 }
+
+$sc = new ServiceConnectorImpl();
+$hr = new HotelRequestor($sc, new Cacher());
+if (is_numeric($_GET['id']))
+{
+  $id = $_GET['id'];
+}
+else
+{
+  $id = 0;
+}
+VisitsLogger::log($_SERVER['REMOTE_ADDR'], $id, "HOTEL_INFO");
+$hotel = $hr->getHotelInfo($id);
 ?>
 <html>
   <head>
@@ -17,20 +30,6 @@ function __autoload($class_name)
     <title></title>
   </head>
   <body>
-    <?php
-    $sc = new ServiceConnectorImpl();
-    $hr = new HotelRequestor($sc, new Cacher());
-    if (is_numeric($_GET['id']))
-    {
-      $id = $_GET['id'];
-    }
-    else
-    {
-      $id = 0;
-    }
-    VisitsLogger::log($_SERVER['REMOTE_ADDR'], $id, "HOTEL_INFO");
-    $hotel = $hr->getHotelInfo($id);
-    ?>
     <table>
       <tr><td>Nome</td><td><?php echo $hotel->name; ?></td></tr>
       <tr><td>Stelle</td><td><?php echo $hotel->stars; ?></td></tr>
